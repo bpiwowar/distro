@@ -94,3 +94,6 @@
 [submodule "extra/nngraph"]
 	path = extra/nngraph
 	url = https://github.com/torch/nngraph
+[submodule "extras/matio"]
+	path = extras/matio
+	url = https://github.com/soumith/matio-ffi.torch.git
