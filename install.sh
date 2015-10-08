@@ -73,25 +73,30 @@ fi
 setup_lua_env_cmd=$($PREFIX/bin/luarocks path -bin)
 eval "$setup_lua_env_cmd"
 
+torchinstall() {
+  (cat ${THIS_DIR}/$1/$2/matio-scm-1.rockspec ; echo 'for i, v in ipairs(dependencies) do print(v) end') | $PREFIX/bin/luajit
+  cd ${THIS_DIR}/$1 && $PREFIX/bin/luarocks make $2
+}
+
 echo "Installing common Lua packages"
 $PREFIX/bin/luarocks install luafilesystem 2>&1 >> $PREFIX/install.log && echo "Installed luafilesystem"
 $PREFIX/bin/luarocks install penlight      2>&1 >> $PREFIX/install.log && echo "Installed penlight"
 $PREFIX/bin/luarocks install lua-cjson     2>&1 >> $PREFIX/install.log && echo "Installed lua-cjson"
 
 echo "Installing core Torch packages"
-cd ${THIS_DIR}/pkg/sundown   && $PREFIX/bin/luarocks make rocks/sundown-scm-1.rockspec || exit 1
-cd ${THIS_DIR}/pkg/cwrap     && $PREFIX/bin/luarocks make rocks/cwrap-scm-1.rockspec   || exit 1
-cd ${THIS_DIR}/pkg/paths     && $PREFIX/bin/luarocks make rocks/paths-scm-1.rockspec   || exit 1
-cd ${THIS_DIR}/pkg/torch     && $PREFIX/bin/luarocks make rocks/torch-scm-1.rockspec   || exit 1
-cd ${THIS_DIR}/pkg/dok       && $PREFIX/bin/luarocks make rocks/dok-scm-1.rockspec     || exit 1
-cd ${THIS_DIR}/exe/trepl     && $PREFIX/bin/luarocks make                              || exit 1
-cd ${THIS_DIR}/pkg/sys       && $PREFIX/bin/luarocks make sys-1.1-0.rockspec           || exit 1
-cd ${THIS_DIR}/pkg/xlua      && $PREFIX/bin/luarocks make xlua-1.0-0.rockspec          || exit 1
-cd ${THIS_DIR}/extra/nn      && $PREFIX/bin/luarocks make rocks/nn-scm-1.rockspec      || exit 1
-cd ${THIS_DIR}/extra/graph   && $PREFIX/bin/luarocks make rocks/graph-scm-1.rockspec   || exit 1
-cd ${THIS_DIR}/extra/nngraph && $PREFIX/bin/luarocks make                              || exit 1
-cd ${THIS_DIR}/pkg/image     && $PREFIX/bin/luarocks make image-1.1.alpha-0.rockspec   || exit 1
-cd ${THIS_DIR}/pkg/optim     && $PREFIX/bin/luarocks make optim-1.0.5-0.rockspec       || exit 1
+torchinstall pkg/sundown    rocks/sundown-scm-1.rockspec    || exit 1
+torchinstall pkg/cwrap      rocks/cwrap-scm-1.rockspec      || exit 1
+torchinstall pkg/paths      rocks/paths-scm-1.rockspec      || exit 1
+torchinstall pkg/torch      rocks/torch-scm-1.rockspec      || exit 1
+torchinstall pkg/dok        rocks/dok-scm-1.rockspec        || exit 1
+torchinstall exe/trepl      trepl-scm-1.rockspec            || exit 1
+torchinstall pkg/sys        sys-1.1-0.rockspec              || exit 1
+torchinstall pkg/xlua       xlua-1.0-0.rockspec             || exit 1
+torchinstall extra/nn       rocks/nn-scm-1.rockspec         || exit 1
+torchinstall extra/graph    rocks/graph-scm-1.rockspec      || exit 1
+torchinstall extra/nngraph  nngraph-scm-1.rockspec          || exit 1
+torchinstall pkg/image      image-1.1.alpha-0.rockspec      || exit 1
+torchinstall pkg/optim      optim-1.0.5-0.rockspec          || exit 1
 
 if [ -x "$path_to_nvcc" ] || [ -x "$path_to_nvidiasmi" ]
 then
@@ -102,16 +107,17 @@ fi
 
 # Optional packages
 echo "Installing optional Torch packages"
-cd ${THIS_DIR}/pkg/gnuplot          && $PREFIX/bin/luarocks make rocks/gnuplot-scm-1.rockspec
-cd ${THIS_DIR}/exe/env              && $PREFIX/bin/luarocks make
-cd ${THIS_DIR}/extra/nnx            && $PREFIX/bin/luarocks make nnx-0.1-1.rockspec
-cd ${THIS_DIR}/extra/threads        && $PREFIX/bin/luarocks make rocks/threads-scm-1.rockspec
-cd ${THIS_DIR}/extra/graphicsmagick && $PREFIX/bin/luarocks make graphicsmagick-1.scm-0.rockspec
-cd ${THIS_DIR}/extra/argcheck       && $PREFIX/bin/luarocks make rocks/argcheck-scm-1.rockspec
-cd ${THIS_DIR}/extra/audio          && $PREFIX/bin/luarocks make audio-0.1-0.rockspec
-cd ${THIS_DIR}/extra/fftw3          && $PREFIX/bin/luarocks make rocks/fftw3-scm-1.rockspec
-cd ${THIS_DIR}/extra/signal         && $PREFIX/bin/luarocks make rocks/signal-scm-1.rockspec
-cd ${THIS_DIR}/extra/torch-svm      && $PREFIX/bin/luarocks make svm-0.1-0.rockspec
+torchinstall pkg/gnuplot           rocks/gnuplot-scm-1.rockspec
+torchinstall exe/env
+torchinstall extra/nnx             nnx-0.1-1.rockspec
+torchinstall extra/threads         rocks/threads-scm-1.rockspec
+torchinstall extra/graphicsmagick  graphicsmagick-1.scm-0.rockspec
+torchinstall extra/argcheck        rocks/argcheck-scm-1.rockspec
+torchinstall extra/audio           audio-0.1-0.rockspec
+torchinstall extra/fftw3           rocks/fftw3-scm-1.rockspec
+torchinstall extra/signal          rocks/signal-scm-1.rockspec
+torchinstall extra/torch-svm       svm-0.1-0.rockspec
+torchinstall extra/matio           matio-scm-1.rockspec
 
 # Optional CUDA packages
 if [ -x "$path_to_nvcc" ] || [ -x "$path_to_nvidiasmi" ]
